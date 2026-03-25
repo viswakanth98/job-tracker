@@ -24,6 +24,9 @@ interface UIStore {
   setStatusFilter: (status: ApplicationStatus | 'All') => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
+
+  kanbanView: boolean;
+  setKanbanView: (v: boolean) => void;
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -49,4 +52,7 @@ export const useUIStore = create<UIStore>((set) => ({
   setStatusFilter: (status) => set({ activeStatusFilter: status }),
   searchQuery: '',
   setSearchQuery: (q) => set({ searchQuery: q }),
+
+  kanbanView: false,
+  setKanbanView: (v) => set({ kanbanView: v }),
 }));

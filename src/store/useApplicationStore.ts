@@ -11,7 +11,9 @@ const SEED: Application[] = [
     jobUrl: 'https://stripe.com/jobs', source: 'LinkedIn', status: 'Interviewing',
     priority: 'High', hrName: 'Sarah Chen', hrContact: 'sarah@stripe.com',
     nextAction: 'Prepare system design', nextActionDate: '2024-03-20',
-    salaryRange: '$150k–$180k', location: 'Remote', notes: 'Great company culture, strong referral from John.',
+    salaryRange: '$150k–$180k', location: 'Remote',
+    notes: 'Great company culture, strong referral from John.',
+    jobDescription: 'We are looking for a Senior Frontend Engineer to join our Payments team. You will build the next generation of payment UIs using React, TypeScript, and modern web standards.',
     createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
   },
   {
@@ -19,7 +21,9 @@ const SEED: Application[] = [
     jobUrl: 'https://notion.so/jobs', source: 'Company Site', status: 'Applied',
     priority: 'Medium', hrName: '', hrContact: '',
     nextAction: 'Follow up if no response by March 15', nextActionDate: '2024-03-15',
-    salaryRange: '$130k–$160k', location: 'San Francisco, CA', notes: '',
+    salaryRange: '$130k–$160k', location: 'San Francisco, CA',
+    notes: '',
+    jobDescription: '',
     createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
   },
   {
@@ -27,7 +31,9 @@ const SEED: Application[] = [
     jobUrl: 'https://linear.app/jobs', source: 'Referral', status: 'Offer',
     priority: 'High', hrName: 'Mike Torres', hrContact: 'mike@linear.app',
     nextAction: 'Negotiate offer', nextActionDate: '2024-03-22',
-    salaryRange: '$160k–$190k', location: 'Remote', notes: 'Offer received! $170k base + equity.',
+    salaryRange: '$160k–$190k', location: 'Remote',
+    notes: 'Offer received! $170k base + equity.',
+    jobDescription: 'Build the tools that engineers love. Work on a small, focused team to design and implement core product features.',
     createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
   },
 ];

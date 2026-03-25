@@ -30,8 +30,16 @@ export interface Application {
   salaryRange: string;
   location: string;
   notes: string;
+  jobDescription: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface NoteEntry {
+  id: string;
+  applicationId: string;
+  text: string;
+  createdAt: string;
 }
 
 export interface InterviewRound {

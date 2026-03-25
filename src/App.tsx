@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage';
 import ApplicationsPage from './pages/ApplicationsPage';
 import InterviewLogPage from './pages/InterviewLogPage';
 import ContactsPage from './pages/ContactsPage';
+import StatsPage from './pages/StatsPage';
 
 export default function App() {
   const { setSidebarOpen } = useUIStore();
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/applications" element={<ApplicationsPage />} />
             <Route path="/applications/:applicationId/interviews" element={<InterviewLogPage />} />
+            <Route path="/stats" element={<StatsPage />} />
             <Route path="/contacts" element={<ContactsPage />} />
           </Routes>
         </main>
