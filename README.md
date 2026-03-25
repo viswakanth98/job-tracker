@@ -1,35 +1,62 @@
 # Job Tracker
 
-A structured, minimal job application tracker built with React + TypeScript. Manage your entire job search — applications, interview rounds, and recruiter contacts — all in one place, with data stored locally in your browser.
+A structured, full-featured job application tracker built with React + TypeScript. Manage your entire job search — applications, interview rounds, recruiter contacts, insights, and notes — all in one place, with data stored locally in your browser.
 
-![Dashboard](https://img.shields.io/badge/React-18-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript) ![TailwindCSS](https://img.shields.io/badge/Tailwind-3-06B6D4?logo=tailwindcss) ![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite)
+![React](https://img.shields.io/badge/React-18-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript) ![TailwindCSS](https://img.shields.io/badge/Tailwind-3-06B6D4?logo=tailwindcss) ![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite) ![Zustand](https://img.shields.io/badge/Zustand-4-orange)
 
 ---
 
 ## Features
 
 ### Applications Tracker
-- Track every job application with 14+ fields: company, role, status, priority, HR contact, salary range, location, next action, and more
+- Track every job application with 15+ fields: company, role, status, priority, HR contact, salary range, location, next action, job description, and more
+- **Inline status update** — click the status badge directly in the table row, no modal needed
+- **Overdue follow-up alerts** — red highlight and banner when `Next Action Date` has passed
 - Color-coded status badges across a 10-stage workflow
 - Filter by status, search by company or role
+- **Table view** and **Kanban board view** — toggle between them instantly
 - Direct link to job postings
 
+### Export & Import
+- **Export to CSV** — download all your applications as a `.csv` file for backup or Excel/Sheets
+- **Import from CSV** — bulk-load applications from a spreadsheet with automatic field mapping and validation
+
 ### Interview Log
-- Log every interview round per application (phone screen, technical, panel, HR, etc.)
+- Log every interview round per application (phone screen, technical, panel, HR, final, etc.)
 - Record interviewer, format, topics covered, self-rating (1–10), outcome, feedback received, and personal takeaways
 - Track whether follow-up thank-you was sent
-- Visual self-rating progress bar
+- Visual self-rating progress bar (green/yellow/red based on score)
+
+### Notes Timeline
+- Timestamped activity log per application — like a mini journal
+- Add notes with `Cmd+Enter` (or the Save button)
+- Notes are shown in reverse chronological order with relative timestamps
+- Hover to reveal delete button — keeps the UI clean
+
+### Job Description Storage
+- Paste the full job description inside the application form
+- Saved permanently — so you still have it after the posting goes offline
+- Collapsible section on the interview detail page for easy reference during prep
 
 ### Contacts
-- Keep a directory of recruiters, hiring managers, and referrals
-- Store email, LinkedIn, how you connected, and last contact date
-- Card-based layout for quick scanning
+- Directory of recruiters, hiring managers, and referrals
+- Store email, LinkedIn URL, how you connected, and last contact date
+- Card-based layout for quick scanning and search
 
 ### Dashboard
 - Summary cards: Total Applied, Active Pipeline, Interviewing, Offers
 - Pipeline breakdown with visual progress bars per status
-- Upcoming interviews at a glance
+- Upcoming interviews (pending outcome, sorted by date)
 - Recent application activity
+
+### Insights Page
+- **Response Rate** — % of applications that got any response
+- **Interview Rate** — % that reached an interview stage
+- **Offer Rate** — % that resulted in an offer
+- **Conversion Funnel** — visual bar from Applied → Accepted
+- **Monthly Applications Chart** — bar chart of applications added per month (last 8 months)
+- **Source Performance Table** — which source (LinkedIn, Referral, etc.) gives the best interview rate
+- **Offer Comparison Table** — side-by-side of all active offers (salary, location, status, notes)
 
 ---
 
@@ -37,8 +64,8 @@ A structured, minimal job application tracker built with React + TypeScript. Man
 
 ```
 Bookmarked → Applied → Shortlisted → Phone Screen → Interviewing → Offer → Accepted
-                  ↓            ↓             ↓                ↓
-               Ghosted      Rejected      Rejected         Declined / Withdrawn
+                  ↓            ↓             ↓                ↓              ↓
+               Ghosted      Rejected      Rejected         Withdrawn      Declined
 ```
 
 ---
@@ -55,7 +82,7 @@ Bookmarked → Applied → Shortlisted → Phone Screen → Interviewing → Off
 | Icons | Lucide React |
 | Persistence | Browser `localStorage` |
 
-No backend, no database, no sign-up required. All data stays in your browser.
+No backend, no database, no sign-up required. Everything runs in your browser.
 
 ---
 
@@ -88,7 +115,7 @@ npm run build
 npm run preview
 ```
 
-The production build is output to `dist/`.
+The production build outputs to `dist/`.
 
 ---
 
@@ -96,43 +123,59 @@ The production build is output to `dist/`.
 
 ```
 src/
-├── types/           # TypeScript interfaces (Application, InterviewRound, Contact)
-├── constants/       # Status colors, workflow arrays, dropdown options
+├── types/                     # TypeScript interfaces (Application, InterviewRound, Contact, NoteEntry)
+├── constants/                 # Status colors, workflow arrays, dropdown options
 ├── lib/
-│   ├── storage.ts   # localStorage wrapper
-│   └── utils.ts     # ID generation, date formatting, classnames
-├── store/           # Zustand stores (applications, interviews, contacts, UI)
+│   ├── storage.ts             # localStorage read/write wrapper
+│   ├── utils.ts               # ID generation, date formatting
+│   └── csv.ts                 # Export to CSV + import/parse from CSV
+├── store/
+│   ├── useApplicationStore.ts # Applications CRUD + localStorage sync
+│   ├── useInterviewStore.ts   # Interview rounds CRUD
+│   ├── useContactStore.ts     # Contacts CRUD
+│   ├── useNotesStore.ts       # Notes timeline CRUD
+│   └── useUIStore.ts          # Modal state, filters, kanban toggle
 ├── components/
-│   ├── ui/          # Reusable: Modal, StatusBadge, PriorityBadge, ConfirmDialog
-│   ├── layout/      # Sidebar, PageHeader
-│   ├── applications/# ApplicationForm
-│   ├── interviews/  # InterviewForm
-│   └── contacts/    # ContactForm
-└── pages/           # DashboardPage, ApplicationsPage, InterviewLogPage, ContactsPage
+│   ├── ui/                    # Modal, StatusBadge, PriorityBadge, ConfirmDialog
+│   ├── layout/                # Sidebar, PageHeader
+│   ├── applications/          # ApplicationForm, KanbanView
+│   ├── interviews/            # InterviewForm
+│   └── contacts/              # ContactForm
+└── pages/
+    ├── DashboardPage.tsx
+    ├── ApplicationsPage.tsx
+    ├── InterviewLogPage.tsx
+    ├── StatsPage.tsx
+    └── ContactsPage.tsx
 ```
 
 ---
 
 ## Data Storage
 
-All data is stored in your browser's `localStorage` under three keys:
+All data is stored in your browser's `localStorage` under four keys:
 
 | Key | Contents |
 |-----|---------|
 | `jt_applications` | All job applications |
 | `jt_interviews` | All interview rounds |
 | `jt_contacts` | All contacts |
+| `jt_notes` | All activity notes |
 
-**Note:** Clearing browser data will erase your tracker. For backup, export data via browser DevTools → Application → Local Storage.
+> **Backup tip:** Use the **Export CSV** button regularly to keep a backup. Clearing browser data or switching browsers will erase your tracker.
 
 ---
 
 ## Usage Tips
 
-- **Weekly habit:** Review every Monday — update statuses, set next action dates, archive dead applications
-- **Next Action + Date** fields are your north star. If both are empty on an active application, it's stale
-- Click the chat bubble icon on any application row to open its interview log
-- The interview count badge shows how many rounds are logged per application
+- **Weekly habit:** Every Monday — update statuses, set next action dates, archive dead applications
+- **Next Action + Date** are your north star. If both are empty on an active application, it's stale
+- **Inline status** — update status directly from the table without opening a modal
+- **Overdue alert** — any row with a past `Next Action Date` gets a red indicator. Fix it or it'll nag you
+- **Notes timeline** — use it like a call log: "March 10 — recruiter said team is deciding by Friday"
+- **Job description** — paste the full JD when you apply. Postings go offline after you get the call
+- **Kanban view** — switch to it for a visual pipeline check at the start of your week
+- **Insights** — check Source Performance to double down on what's actually getting you interviews
 - Applications are seeded with sample data on first load — delete them to start fresh
 
 ---
