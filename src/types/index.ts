@@ -14,8 +14,25 @@ export type Priority = 'Low' | 'Medium' | 'High';
 export type InterviewFormat = 'Phone' | 'Video' | 'On-site' | 'Technical' | 'Panel' | 'HR Screen';
 export type InterviewOutcome = 'Passed' | 'Failed' | 'Pending' | 'No Feedback';
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  linkedin: string;
+  targetRole: string;
+  targetCompanies: string;
+  targetSalary: string;
+  noticePeriod: string;
+  resumeLink: string;
+  skills: string;
+  yearsOfExperience: string;
+  updatedAt: string;
+}
+
 export interface Application {
   id: string;
+  userId: string;
   dateApplied: string;
   company: string;
   role: string;
@@ -61,6 +78,7 @@ export interface InterviewRound {
 
 export interface Contact {
   id: string;
+  userId: string;
   name: string;
   company: string;
   role: string;

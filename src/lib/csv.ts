@@ -78,6 +78,7 @@ export const parseApplicationsFromCSV = (
       });
 
       return {
+        userId: row.userId || '',
         company: row.company || 'Unknown',
         role: row.role || 'Unknown',
         dateApplied: row.dateApplied || today,

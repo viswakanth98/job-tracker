@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Plus, Search, Edit2, Trash2, Mail, ExternalLink } from 'lucide-react';
 import { useContactStore } from '../store/useContactStore';
 import { useUIStore } from '../store/useUIStore';
+import { useUserStore } from '../store/useUserStore';
 import { Contact } from '../types';
 import PageHeader from '../components/layout/PageHeader';
 import Modal from '../components/ui/Modal';
@@ -12,23 +13,27 @@ import { formatDate } from '../lib/utils';
 export default function ContactsPage() {
   const { contacts, deleteContact } = useContactStore();
   const { contactModal, openAddContact, openEditContact, closeContactModal } = useUIStore();
+  const { activeUserId } = useUserStore();
   const [deleteTarget, setDeleteTarget] = useState<Contact | null>(null);
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() =>
-    contacts.filter((c) =>
-      !search ||
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.company.toLowerCase().includes(search.toLowerCase())
-    ).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    [contacts, search]
+    contacts
+      .filter((c) => c.userId === activeUserId)
+      .filter((c) =>
+        !search ||
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.company.toLowerCase().includes(search.toLowerCase())
+      )
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [contacts, activeUserId, search]
   );
 
   return (
     <div>
       <PageHeader
         title="Contacts"
-        subtitle={`${contacts.length} contacts`}
+        subtitle={`${filtered.length} contacts`}
         action={
           <button
             onClick={openAddContact}

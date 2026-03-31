@@ -8,6 +8,7 @@ import { useApplicationStore } from '../store/useApplicationStore';
 import { useInterviewStore } from '../store/useInterviewStore';
 import { useNotesStore } from '../store/useNotesStore';
 import { useUIStore } from '../store/useUIStore';
+import { useUserStore } from '../store/useUserStore';
 import { Application, ApplicationStatus } from '../types';
 import { STATUS_WORKFLOW, STATUS_COLORS, PRIORITY_COLORS } from '../constants';
 import PageHeader from '../components/layout/PageHeader';
@@ -35,13 +36,20 @@ export default function ApplicationsPage() {
     activeStatusFilter, setStatusFilter, searchQuery, setSearchQuery,
     kanbanView, setKanbanView,
   } = useUIStore();
+  const { activeUserId } = useUserStore();
 
   const [deleteTarget, setDeleteTarget] = useState<Application | null>(null);
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Only show the active user's applications
+  const userApplications = useMemo(
+    () => applications.filter((a) => a.userId === activeUserId),
+    [applications, activeUserId]
+  );
+
   const filtered = useMemo(() =>
-    applications
+    userApplications
       .filter((a) => activeStatusFilter === 'All' || a.status === activeStatusFilter)
       .filter((a) =>
         !searchQuery ||
@@ -49,7 +57,7 @@ export default function ApplicationsPage() {
         a.role.toLowerCase().includes(searchQuery.toLowerCase())
       )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    [applications, activeStatusFilter, searchQuery]
+    [userApplications, activeStatusFilter, searchQuery]
   );
 
   const handleDelete = () => {
@@ -61,19 +69,19 @@ export default function ApplicationsPage() {
   };
 
   const statusCounts = useMemo(() => {
-    const c: Partial<Record<ApplicationStatus | 'All', number>> = { All: applications.length };
-    applications.forEach((a) => { c[a.status] = (c[a.status] ?? 0) + 1; });
+    const c: Partial<Record<ApplicationStatus | 'All', number>> = { All: userApplications.length };
+    userApplications.forEach((a) => { c[a.status] = (c[a.status] ?? 0) + 1; });
     return c;
-  }, [applications]);
+  }, [userApplications]);
 
   const overdueCount = useMemo(
-    () => applications.filter(isOverdue).length,
-    [applications]
+    () => userApplications.filter(isOverdue).length,
+    [userApplications]
   );
 
   const handleExport = () => {
-    if (applications.length === 0) return;
-    exportApplicationsToCSV(applications);
+    if (userApplications.length === 0) return;
+    exportApplicationsToCSV(userApplications);
   };
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +94,8 @@ export default function ApplicationsPage() {
     if (rows.length === 0) {
       setImportMsg('No valid rows found in the CSV file.');
     } else {
-      rows.forEach((r) => addApplication(r));
+      // Assign to active user if CSV row has no userId
+      rows.forEach((r) => addApplication({ ...r, userId: r.userId || activeUserId }));
       setImportMsg(`Imported ${rows.length} application${rows.length !== 1 ? 's' : ''} successfully.`);
     }
 
@@ -99,7 +108,7 @@ export default function ApplicationsPage() {
     <div>
       <PageHeader
         title="Applications"
-        subtitle={`${applications.length} total · ${filtered.length} showing${overdueCount > 0 ? ` · ${overdueCount} overdue` : ''}`}
+        subtitle={`${userApplications.length} total · ${filtered.length} showing${overdueCount > 0 ? ` · ${overdueCount} overdue` : ''}`}
         action={
           <button
             onClick={openAddApplication}
@@ -155,7 +164,7 @@ export default function ApplicationsPage() {
           </label>
           <button
             onClick={handleExport}
-            disabled={applications.length === 0}
+            disabled={userApplications.length === 0}
             className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Download size={13} />

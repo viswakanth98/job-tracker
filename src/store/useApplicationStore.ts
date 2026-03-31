@@ -7,7 +7,7 @@ const KEY = 'jt_applications';
 
 const SEED: Application[] = [
   {
-    id: '1', dateApplied: '2024-03-01', company: 'Stripe', role: 'Senior Frontend Engineer',
+    id: '1', userId: 'viswa', dateApplied: '2024-03-01', company: 'Stripe', role: 'Senior Frontend Engineer',
     jobUrl: 'https://stripe.com/jobs', source: 'LinkedIn', status: 'Interviewing',
     priority: 'High', hrName: 'Sarah Chen', hrContact: 'sarah@stripe.com',
     nextAction: 'Prepare system design', nextActionDate: '2024-03-20',
@@ -17,7 +17,7 @@ const SEED: Application[] = [
     createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
   },
   {
-    id: '2', dateApplied: '2024-03-05', company: 'Notion', role: 'Product Engineer',
+    id: '2', userId: 'viswa', dateApplied: '2024-03-05', company: 'Notion', role: 'Product Engineer',
     jobUrl: 'https://notion.so/jobs', source: 'Company Site', status: 'Applied',
     priority: 'Medium', hrName: '', hrContact: '',
     nextAction: 'Follow up if no response by March 15', nextActionDate: '2024-03-15',
@@ -27,13 +27,33 @@ const SEED: Application[] = [
     createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
   },
   {
-    id: '3', dateApplied: '2024-02-20', company: 'Linear', role: 'Software Engineer',
+    id: '3', userId: 'viswa', dateApplied: '2024-02-20', company: 'Linear', role: 'Software Engineer',
     jobUrl: 'https://linear.app/jobs', source: 'Referral', status: 'Offer',
     priority: 'High', hrName: 'Mike Torres', hrContact: 'mike@linear.app',
     nextAction: 'Negotiate offer', nextActionDate: '2024-03-22',
     salaryRange: '$160k–$190k', location: 'Remote',
     notes: 'Offer received! $170k base + equity.',
     jobDescription: 'Build the tools that engineers love. Work on a small, focused team to design and implement core product features.',
+    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '4', userId: 'vyshu', dateApplied: '2024-03-08', company: 'Figma', role: 'UX Engineer',
+    jobUrl: 'https://figma.com/jobs', source: 'LinkedIn', status: 'Applied',
+    priority: 'High', hrName: 'Priya Nair', hrContact: 'priya@figma.com',
+    nextAction: 'Send portfolio link', nextActionDate: '2024-03-18',
+    salaryRange: '$140k–$170k', location: 'Remote',
+    notes: 'Applied via LinkedIn. Great design culture.',
+    jobDescription: 'Join the Figma product team to build interfaces that millions of designers use daily.',
+    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '5', userId: 'vyshu', dateApplied: '2024-03-12', company: 'Vercel', role: 'Frontend Engineer',
+    jobUrl: 'https://vercel.com/careers', source: 'Referral', status: 'Shortlisted',
+    priority: 'Medium', hrName: 'James Liu', hrContact: 'james@vercel.com',
+    nextAction: 'Prepare for phone screen', nextActionDate: '2024-03-25',
+    salaryRange: '$130k–$160k', location: 'Remote',
+    notes: 'Referred by college friend. Shortlisted after resume review.',
+    jobDescription: '',
     createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
   },
 ];
@@ -47,7 +67,11 @@ interface ApplicationStore {
 }
 
 export const useApplicationStore = create<ApplicationStore>((set, get) => ({
-  applications: storage.get<Application[]>(KEY) ?? SEED,
+  // Migrate old records that don't have userId by defaulting to 'viswa'
+  applications: (storage.get<Application[]>(KEY) ?? SEED).map((a) => ({
+    ...a,
+    userId: a.userId ?? 'viswa',
+  })),
 
   addApplication: (data) => {
     const id = generateId();

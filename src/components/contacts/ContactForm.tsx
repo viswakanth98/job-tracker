@@ -2,10 +2,12 @@ import React from 'react';
 import { Contact } from '../../types';
 import { useContactStore } from '../../store/useContactStore';
 import { useUIStore } from '../../store/useUIStore';
+import { useUserStore } from '../../store/useUserStore';
 
 const CONNECTION_OPTIONS = ['LinkedIn', 'Referral', 'Email', 'Event', 'Cold Outreach', 'Other'];
 
 const empty: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'> = {
+  userId: '',
   name: '', company: '', role: '', email: '', linkedin: '',
   howConnected: 'LinkedIn', lastContacted: '', notes: '',
 };
@@ -13,6 +15,7 @@ const empty: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'> = {
 export default function ContactForm() {
   const { contactModal, closeContactModal } = useUIStore();
   const { addContact, updateContact } = useContactStore();
+  const { activeUserId } = useUserStore();
   const { mode, data } = contactModal;
 
   const defaults = mode === 'edit' && data ? data : empty;
@@ -20,7 +23,17 @@ export default function ContactForm() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const values = Object.fromEntries(fd.entries()) as Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>;
+    const values: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'> = {
+      userId: mode === 'edit' && data ? data.userId : activeUserId,
+      name: fd.get('name') as string,
+      company: fd.get('company') as string,
+      role: fd.get('role') as string,
+      email: fd.get('email') as string,
+      linkedin: fd.get('linkedin') as string,
+      howConnected: fd.get('howConnected') as string,
+      lastContacted: fd.get('lastContacted') as string,
+      notes: fd.get('notes') as string,
+    };
     if (mode === 'edit' && data) {
       updateContact(data.id, values);
     } else {

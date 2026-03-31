@@ -1,13 +1,28 @@
 import { useMemo } from 'react';
 import { useApplicationStore } from '../store/useApplicationStore';
 import { useInterviewStore } from '../store/useInterviewStore';
+import { useUserStore } from '../store/useUserStore';
 import { STATUS_COLORS } from '../constants';
 import PageHeader from '../components/layout/PageHeader';
 import { TrendingUp, Target, Award, Zap } from 'lucide-react';
 
 export default function StatsPage() {
-  const { applications } = useApplicationStore();
-  const { interviews } = useInterviewStore();
+  const { applications: allApplications } = useApplicationStore();
+  const { interviews: allInterviews } = useInterviewStore();
+  const { activeUserId } = useUserStore();
+
+  // Scope everything to the active user
+  const applications = useMemo(
+    () => allApplications.filter((a) => a.userId === activeUserId),
+    [allApplications, activeUserId]
+  );
+
+  const userAppIds = useMemo(() => new Set(applications.map((a) => a.id)), [applications]);
+
+  const interviews = useMemo(
+    () => allInterviews.filter((i) => userAppIds.has(i.applicationId)),
+    [allInterviews, userAppIds]
+  );
 
   const stats = useMemo(() => {
     const total = applications.length;

@@ -3,10 +3,12 @@ import { Application } from '../../types';
 import { STATUS_WORKFLOW, PRIORITY_OPTIONS, SOURCE_OPTIONS } from '../../constants';
 import { useApplicationStore } from '../../store/useApplicationStore';
 import { useUIStore } from '../../store/useUIStore';
+import { useUserStore } from '../../store/useUserStore';
 
 const today = new Date().toISOString().split('T')[0];
 
 const emptyForm: Omit<Application, 'id' | 'createdAt' | 'updatedAt'> = {
+  userId: '',
   dateApplied: today,
   company: '',
   role: '',
@@ -27,6 +29,7 @@ const emptyForm: Omit<Application, 'id' | 'createdAt' | 'updatedAt'> = {
 export default function ApplicationForm() {
   const { applicationModal, closeApplicationModal } = useUIStore();
   const { addApplication, updateApplication } = useApplicationStore();
+  const { activeUserId } = useUserStore();
 
   const { mode, data } = applicationModal;
 
@@ -34,6 +37,7 @@ export default function ApplicationForm() {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const values: Omit<Application, 'id' | 'createdAt' | 'updatedAt'> = {
+      userId: mode === 'edit' && data ? data.userId : activeUserId,
       company: fd.get('company') as string,
       role: fd.get('role') as string,
       dateApplied: fd.get('dateApplied') as string,

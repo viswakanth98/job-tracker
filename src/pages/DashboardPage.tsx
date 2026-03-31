@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useApplicationStore } from '../store/useApplicationStore';
 import { useInterviewStore } from '../store/useInterviewStore';
+import { useUserStore, getAvatarColor } from '../store/useUserStore';
 import { ApplicationStatus } from '../types';
 import { STATUS_COLORS, STATUS_WORKFLOW } from '../constants';
 import { Briefcase, TrendingUp, MessageSquare, Award } from 'lucide-react';
@@ -10,37 +11,51 @@ import { formatDate } from '../lib/utils';
 export default function DashboardPage() {
   const { applications } = useApplicationStore();
   const { interviews } = useInterviewStore();
+  const { activeUserId, getActiveUser } = useUserStore();
+
+  const activeUser = getActiveUser();
+
+  // Filter to active user only
+  const userApplications = useMemo(
+    () => applications.filter((a) => a.userId === activeUserId),
+    [applications, activeUserId]
+  );
+
+  const userAppIds = useMemo(
+    () => new Set(userApplications.map((a) => a.id)),
+    [userApplications]
+  );
 
   const stats = useMemo(() => {
-    const active = applications.filter((a) =>
+    const active = userApplications.filter((a) =>
       !['Rejected', 'Ghosted', 'Withdrawn', 'Accepted'].includes(a.status)
     );
-    const interviewing = applications.filter((a) =>
+    const interviewing = userApplications.filter((a) =>
       ['Phone Screen', 'Interviewing'].includes(a.status)
     );
-    const offers = applications.filter((a) => ['Offer', 'Accepted'].includes(a.status));
-    return { total: applications.length, active: active.length, interviewing: interviewing.length, offers: offers.length };
-  }, [applications]);
+    const offers = userApplications.filter((a) => ['Offer', 'Accepted'].includes(a.status));
+    return { total: userApplications.length, active: active.length, interviewing: interviewing.length, offers: offers.length };
+  }, [userApplications]);
 
   const statusBreakdown = useMemo(() => {
     const counts: Partial<Record<ApplicationStatus, number>> = {};
-    applications.forEach((a) => {
+    userApplications.forEach((a) => {
       counts[a.status] = (counts[a.status] ?? 0) + 1;
     });
     return STATUS_WORKFLOW.filter((s) => counts[s]).map((s) => ({ status: s, count: counts[s]! }));
-  }, [applications]);
+  }, [userApplications]);
 
   const recent = useMemo(() =>
-    [...applications].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 5),
-    [applications]
+    [...userApplications].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 5),
+    [userApplications]
   );
 
   const upcomingInterviews = useMemo(() =>
     [...interviews]
-      .filter((i) => i.outcome === 'Pending' && i.dateTime)
+      .filter((i) => i.outcome === 'Pending' && i.dateTime && userAppIds.has(i.applicationId))
       .sort((a, b) => a.dateTime.localeCompare(b.dateTime))
       .slice(0, 5),
-    [interviews]
+    [interviews, userAppIds]
   );
 
   const cards = [
@@ -52,7 +67,16 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <PageHeader title="Dashboard" subtitle="Your job search at a glance" />
+      <PageHeader
+        title="Dashboard"
+        subtitle={`${activeUser.name}'s job search at a glance`}
+        action={
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${getAvatarColor(activeUser.id)}`}>
+            <span className="text-white font-bold text-sm">{activeUser.name.slice(0, 2).toUpperCase()}</span>
+            <span className="text-white text-sm font-medium">{activeUser.name}</span>
+          </div>
+        }
+      />
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -85,7 +109,7 @@ export default function DashboardPage() {
                   <div className="flex-1 bg-gray-100 rounded-full h-2">
                     <div
                       className="bg-blue-500 h-2 rounded-full transition-all"
-                      style={{ width: `${(count / applications.length) * 100}%` }}
+                      style={{ width: `${(count / userApplications.length) * 100}%` }}
                     />
                   </div>
                   <span className="text-sm font-semibold text-gray-700 w-6 text-right">{count}</span>
@@ -103,7 +127,7 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-3">
               {upcomingInterviews.map((i) => {
-                const app = applications.find((a) => a.id === i.applicationId);
+                const app = userApplications.find((a) => a.id === i.applicationId);
                 return (
                   <div key={i.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                     <div className="w-2 h-2 mt-1.5 rounded-full bg-violet-400 flex-shrink-0" />
